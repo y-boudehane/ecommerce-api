@@ -39,15 +39,27 @@ Avant de commencer, assurez-vous d'avoir les outils suivants installés sur votr
      cp .env.example .env
      ```
    - Modifiez les paramètres de connexion à la base de données dans le fichier `.env`.
+   - **Configuration de l'email :**
+     - Ajoutez les lignes suivantes pour configurer l'email :
+       ```env
+       MAIL_MAILER=smtp
+       MAIL_HOST=smtp.votre-fournisseur-email.com
+       MAIL_PORT=587
+       MAIL_USERNAME=votre-email@example.com
+       MAIL_PASSWORD=votre-mot-de-passe
+       MAIL_ENCRYPTION=tls
+       MAIL_FROM_ADDRESS=votre-email@example.com
+       MAIL_FROM_NAME="Nom de votre application"
+       ```
 
 4. **Générez la clé d'application :**
    ```bash
    php artisan key:generate
    ```
 
-5. **Exécutez les migrations et les seeders :**
+5. **Exécutez les migrations :**
    ```bash
-   php artisan migrate --seed
+   php artisan migrate
    ```
 
 6. **Démarrez le serveur :**
@@ -55,10 +67,6 @@ Avant de commencer, assurez-vous d'avoir les outils suivants installés sur votr
    php artisan serve
    ```
 
-7. **Consultez la documentation API :**
-- Visiter la documentation via endpoint : api/documentation
-
-
 Votre API est maintenant prête à être utilisée !
 
-</file>
+</rewritten_file>

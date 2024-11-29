@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\StatController;
 use App\Http\Middleware\LogEndpointRequests;
 use App\Models\EndpointStat;
 
@@ -31,12 +32,5 @@ Route::post('/logout', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-Route::get('/stats', function () {
-    return response()->json(EndpointStat::all());
-});
-
-Route::get('/stats/{endpoint}', function ($endpoint) {
-    $stats = EndpointStat::where('endpoint',  'LIKE', "%{$endpoint}%")->get();
-
-    return response()->json($stats);
-});
+Route::get('/stats', [StatController::class, 'index']);
+Route::get('/stats/search', [StatController::class, 'show']);

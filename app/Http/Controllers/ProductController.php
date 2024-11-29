@@ -10,18 +10,6 @@ use App\Models\Product;
 use DB;
 use Illuminate\Http\Request;
 
-/**
- * @OA\Info(
- *     version="1.0.0",
- *     title="Product Management API",
- *     description="API for managing products in an e-commerce platform."
- * )
- *
- * @OA\Server(
- *     url="/api",
- *     description="E-Commerce API Server"
- * )
- */
 class ProductController extends Controller
 {
 
@@ -32,6 +20,7 @@ class ProductController extends Controller
      *     tags={"Products"},
      *     summary="Get a list of products",
      *     description="Retrieve a paginated list of products with optional filtering and sorting.",
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="category",
      *         in="query",
@@ -59,6 +48,13 @@ class ProductController extends Controller
      *         description="Number of products per page",
      *         required=false,
      *         @OA\Schema(type="integer", example=10)
+     *     ),
+     *         @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="selected page for pagination",
+     *         required=false,
+     *         @OA\Schema(type="integer", example=1)
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -89,6 +85,7 @@ class ProductController extends Controller
      *     operationId="createProduct",
      *     tags={"Products"},
      *     summary="Create a new product",
+     *     security={{"BearerAuth": {}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -118,10 +115,8 @@ class ProductController extends Controller
             $product = Product::create($request->toArray());
             $product->categories()->sync($request->categories);
 
-            //NOTE - I have used event and listner as first solution, than i opted for Observer (ProductObserver) which is better for listening for many events on one model, Observer classes have method names which reflect the Eloquent events we wish to listen for (in this case created and updated)
-
-            // event(new ProductUpdatedOrCreated($product, 'created'));
-
+            event(new ProductUpdatedOrCreated($product, 'created'));
+            DB::commit();
             return response()->json(['message' => 'Product added with success', 'product' => $product->load('categories')], 201);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -135,6 +130,7 @@ class ProductController extends Controller
      *     operationId="getProduct",
      *     tags={"Products"},
      *     summary="Get a product by ID",
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -170,6 +166,7 @@ class ProductController extends Controller
      *     operationId="updateProduct",
      *     tags={"Products"},
      *     summary="Update an existing product",
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -207,8 +204,8 @@ class ProductController extends Controller
             $product->update($request->toArray());
             $product->categories()->sync($request->categories);
 
-            // event(new ProductUpdatedOrCreated($product, 'updated'));
-
+            event(new ProductUpdatedOrCreated($product, 'updated'));
+            DB::commit();
             return response()->json(['message' => 'Product updated with success', 'product' => $product->load('categories')], 200);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -222,6 +219,7 @@ class ProductController extends Controller
      *     operationId="deleteProduct",
      *     tags={"Products"},
      *     summary="Delete a product",
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -239,24 +237,23 @@ class ProductController extends Controller
      *     )
      * )
      */
-    public function destroy($product)
+    public function destroy($id)
     {
         try {
-            $product = Product::findOrFail($product);
+            $product = Product::findOrFail($id);
             $product->delete();
-
-            return response()->json(['message' => 'Product deleted with success'], 200);
+            return response()->json(['message' => 'Product deleted successfully'], 200);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'An error occurred while deleting the product', 'error' => $e->getMessage()], 500);
+            return response()->json(['message' => 'Product not found', 'error' => $e->getMessage()], 404);
         }
     }
-
     /**
      * @OA\Get(
-     *     path="/products/search",
+     *     path="/search/products/",
      *     operationId="searchProducts",
      *     tags={"Products"},
      *     summary="Search for products by name or description",
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="query",
      *         in="query",
@@ -271,6 +268,13 @@ class ProductController extends Controller
      *         required=false,
      *         @OA\Schema(type="integer", example=10)
      *     ),
+     *         @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         description="Selected page for pagination",
+     *         required=false,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Search results",
@@ -278,17 +282,16 @@ class ProductController extends Controller
      *     )
      * )
      */
-
     public function search(Request $request)
     {
-        // Valider les paramètres de recherche
+        // Validate the search parameters
         $request->validate([
             'query' => 'required|string|max:255',
         ]);
 
         $query = $request->get('query');
 
-        // Rechercher dans le nom ou la description
+        // Search in the name or description
         $products = Product::where('name', 'LIKE', "%{$query}%")
             ->orWhere('description', 'LIKE', "%{$query}%")
             ->with('categories')

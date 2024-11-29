@@ -7,20 +7,15 @@ use App\Http\Resources\ProductResource;
 use App\Models\Category;
 use Illuminate\Http\Request;
 
-/**
- * @OA\Tag(
- *     name="Categories",
- *     description="API endpoints for managing categories and fetching related products"
- * )
- */
 class CategoryController extends Controller
 {
     /**
      * @OA\Get(
-     *     path="/api/categories",
+     *     path="/categories",
      *     tags={"Categories"},
      *     summary="List all categories",
      *     description="Fetch a list of all categories",
+     *     security={{"BearerAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
@@ -43,10 +38,11 @@ class CategoryController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/categories/{categoryId}/products",
+     *     path="/categories/{categoryId}/products",
      *     tags={"Categories"},
      *     summary="Get products by category",
      *     description="Fetch a paginated list of products associated with a specific category",
+     *     security={{"BearerAuth": {}}},
      *     @OA\Parameter(
      *         name="categoryId",
      *         in="path",

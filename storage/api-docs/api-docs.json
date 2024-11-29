@@ -12,14 +12,176 @@
         }
     ],
     "paths": {
-        "/api/categories": {
+        "/login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Login a user and retrieve an API token",
+                "description": "This endpoint allows a user to log in with their email and password, and returns an API token upon successful authentication.",
+                "operationId": "loginUser",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "test@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "token": {
+                                            "type": "string",
+                                            "example": "your-api-token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid credentials"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The email field is required."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/register": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Register a new user and get an API token",
+                "description": "This endpoint allows a new user to register by providing their name, email, and password. It returns an API token upon successful registration.",
+                "operationId": "registerUser",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "user"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "user@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "example": "password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User registered successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "token": {
+                                            "type": "string",
+                                            "example": "your-api-token"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The email has already been taken."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/categories": {
             "get": {
                 "tags": [
                     "Categories"
                 ],
                 "summary": "List all categories",
                 "description": "Fetch a list of all categories",
-                "operationId": "3f5817a34833d0a1f4af4548dd3aeaba",
+                "operationId": "ead5fb1cf2a7453acb2e37928a1b1eaf",
                 "responses": {
                     "200": {
                         "description": "Successful operation",
@@ -39,17 +201,22 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/api/categories/{categoryId}/products": {
+        "/categories/{categoryId}/products": {
             "get": {
                 "tags": [
                     "Categories"
                 ],
                 "summary": "Get products by category",
                 "description": "Fetch a paginated list of products associated with a specific category",
-                "operationId": "39a20ded0d4b970aebd26fcf2154a8fa",
+                "operationId": "14d04b9a585ba949a4e6bd26142829c9",
                 "parameters": [
                     {
                         "name": "categoryId",
@@ -113,7 +280,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
         "/products": {
@@ -168,6 +340,16 @@
                             "type": "integer",
                             "example": 10
                         }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "selected page for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
                     }
                 ],
                 "responses": {
@@ -184,7 +366,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -247,7 +434,12 @@
                     "500": {
                         "description": "Internal server error"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
         "/products/{id}": {
@@ -283,7 +475,12 @@
                     "404": {
                         "description": "Product not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "put": {
                 "tags": [
@@ -357,7 +554,12 @@
                     "404": {
                         "description": "Product not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -384,10 +586,15 @@
                     "404": {
                         "description": "Product not found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
             }
         },
-        "/products/search": {
+        "/search/products/": {
             "get": {
                 "tags": [
                     "Products"
@@ -414,6 +621,16 @@
                             "type": "integer",
                             "example": 10
                         }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Selected page for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
                     }
                 ],
                 "responses": {
@@ -429,6 +646,92 @@
                                 }
                             }
                         }
+                    }
+                },
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/stats": {
+            "get": {
+                "tags": [
+                    "Stats"
+                ],
+                "summary": "Retrieve all endpoint statistics",
+                "description": "Get a list of all statistics for endpoints.",
+                "operationId": "getAllStats",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/EndpointStat"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error"
+                    }
+                }
+            }
+        },
+        "/stats/search": {
+            "get": {
+                "tags": [
+                    "Stats"
+                ],
+                "summary": "Retrieve statistics for a specific endpoint",
+                "description": "Get statistics for a specific endpoint by sending the endpoint name in the request body.",
+                "operationId": "searchStatsByEndpoint",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "endpoint"
+                                ],
+                                "properties": {
+                                    "endpoint": {
+                                        "type": "string",
+                                        "example": "api/products"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/EndpointStat"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "No stats found for the given endpoint"
+                    },
+                    "400": {
+                        "description": "Bad request: endpoint is required"
+                    },
+                    "500": {
+                        "description": "Internal server error"
                     }
                 }
             }
@@ -450,6 +753,35 @@
                     "name": {
                         "type": "string",
                         "example": "Electronics"
+                    }
+                },
+                "type": "object"
+            },
+            "EndpointStat": {
+                "title": "EndpointStat",
+                "description": "Model for storing endpoint statistics",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "endpoint": {
+                        "type": "string",
+                        "example": "/api/products"
+                    },
+                    "hits": {
+                        "type": "integer",
+                        "example": 150
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-11-29T10:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-11-29T10:00:00Z"
                     }
                 },
                 "type": "object"
@@ -492,16 +824,38 @@
                 },
                 "type": "object"
             }
+        },
+        "securitySchemes": {
+            "BearerAuth": {
+                "type": "http",
+                "description": "Use the Bearer token for authentication",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            },
+            "sanctum": {
+                "type": "apiKey",
+                "description": "Enter token in format (Bearer <token>)",
+                "name": "Authorization",
+                "in": "header"
+            }
         }
     },
     "tags": [
         {
+            "name": "Authentication",
+            "description": "Authentication"
+        },
+        {
             "name": "Categories",
-            "description": "API endpoints for managing categories and fetching related products"
+            "description": "Categories"
         },
         {
             "name": "Products",
             "description": "Products"
+        },
+        {
+            "name": "Stats",
+            "description": "Stats"
         }
     ]
 }
