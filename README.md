@@ -68,5 +68,3 @@ Avant de commencer, assurez-vous d'avoir les outils suivants installés sur votr
    ```
 
 Votre API est maintenant prête à être utilisée !
-
-</rewritten_file>
